@@ -132,7 +132,6 @@ CREATE PROCEDURE customers_sales_report(
 	IN year_param integer,
 	OUT report LONGTEXT)
 BEGIN
-    DECLARE total_sales integer;
     DECLARE v_month integer;
     DECLARE v_employee VARCHAR(100);
     DECLARE v_customer VARCHAR(100);
