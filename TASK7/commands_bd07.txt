@@ -1,0 +1,189 @@
+>> Exercise 1
+
+use zoo
+
+
+>> Exercise 2
+
+db.createCollection('animals')
+
+
+>> Exercise 3
+
+db.getName()
+show collections
+
+
+>> Exercise 4
+//Example of insertion
+
+db.animals.insertMany([
+    {
+    "_id": 1,
+    "name": "Shere Khan",
+    "age": 10,
+    "gender": "Male",
+    "species": "Tiger",
+    "habitat": "Rainforest",
+    "birthplace": "Sundarbans, India",
+    "parents": [
+      { "name": "Unknown", "gender": "Male" },
+      { "name": "Unknown", "gender": "Female" }
+    ],
+    "caretakers": [{ "idCaretaker": 101, "nameCaretaker": "John Smith" }]
+  },
+  {
+    "_id": 2,
+    "name": "Rajah",
+    "age": 8,
+    "gender": "Male",
+    "species": "Tiger",
+    "habitat": "Rainforest",
+    "birthplace": "Bandipur Tiger Reserve, India",
+    "parents": [
+      { "name": "Shere Khan", "gender": "Male" },
+      { "name": "Tala", "gender": "Female" }
+    ],
+    "caretakers": [{ "idCaretaker": 102, "nameCaretaker": "Emily Brown" }]
+  }
+])
+
+
+>> Exercise 5
+
+db.animals.find({habitat: "Rainforest", "caretakers.nameCaretaker": "Emily Brown"})
+
+
+>> Exercise 6
+
+db.animals.find(
+    {},
+    {_id: 0, name: 1, species: 1, habitat: 1}
+).sort({species:1})
+
+
+>> Exercise 7
+
+db.animals.find(
+    {species: "Tiger"},
+    {_id: 0, name: 1, age: 1}
+).sort({age: -1})
+
+
+>> Exercise 8
+
+db.animals.insertOne({
+    name: "Leo",
+    age: 7,
+    gender: "Male",
+    species: "Lion",
+    habitat: "Savanna",
+    birthplace: "Masai Mara, Kenya",
+    parents: [
+        {name: "Unknown", gender : "Male"},
+        {name: "Unknown", gender : "Female"}
+    ],
+    caretakers: [
+        { idCaretaker: 501, nameCaretaker: "Jake Adams" }
+    ]
+})
+
+
+>> Exercise 9
+
+db.animals.updateOne(
+    {"name": "Leo"},
+    {$set: {"age": 8}}
+)
+
+
+>> Exercise 10
+
+db.animals.updateMany(
+    {},
+    {$rename: {habitat: "environment"}}
+)
+
+
+>> Exercise 11
+
+db.animals.aggregate([
+    {$match: {"age": {$lt: 10}}},
+    {$sort: {"name": 1}}
+])
+
+
+>> Exercise 12
+
+db.animals.aggregate([
+    {$group: {_id: "$species", count: {$sum: 1}}}
+])
+
+
+>> Exercise 13
+
+db.animals.aggregate([
+    {$unwind: "$caretakers"},
+    {$group: {
+        _id: "$caretakers.idCaretaker",
+        nameCaretaker: {$first: "$caretakers.nameCaretaker"},
+        animals: {$addToSet: "$name"}
+    }},
+    {   $project: {
+            _id: "$_id",
+            nameCaretaker: 1, 
+            animals: 1
+        }
+    },
+    {$out: "Caretakers"}
+])
+
+
+>> Exercise 14
+
+db.animals.find({
+}).sort({age: -1}).limit(3)
+
+
+>> Exercise 15
+
+db.animals.find({}).skip(5).limit(7)
+
+  >> or
+
+db.animals.aggregate([
+    {$skip: 5},
+    {$limit: 7}
+])
+
+
+>> Exercise 16
+
+db.animals.aggregate([
+    {$unwind: "$caretakers" },
+    {$group: {
+        _id: "$environment",
+        totalAnimals: {$sum: 1},
+        species: {$addToSet: "$species"},
+        caretakers: {$addToSet: "$caretakers.nameCaretaker"}
+
+    }},
+    {$project: {
+        _id: 0,
+        environment: "$_id",
+        totalAnimals: 1,
+        species: {
+            $sortArray: {
+                input: "$species",
+                sortBy: 1}
+        },
+        caretakers: {
+            $sortArray: {
+                input: "$caretakers",
+                sortBy: 1 } 
+        }
+    }},
+    {$out: "Habitats"}
+])
+
+
